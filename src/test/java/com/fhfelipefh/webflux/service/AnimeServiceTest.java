@@ -27,7 +27,7 @@ import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 @ExtendWith(SpringExtension.class)
-class AnimeServiceTest {
+public class AnimeServiceTest {
 
     @InjectMocks
     private AnimeService animeService;
