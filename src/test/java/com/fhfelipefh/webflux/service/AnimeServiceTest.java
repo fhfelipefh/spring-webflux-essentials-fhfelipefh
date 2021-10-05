@@ -4,6 +4,7 @@ import com.fhfelipefh.webflux.model.Anime;
 import com.fhfelipefh.webflux.repository.AnimeRepository;
 import com.fhfelipefh.webflux.util.AnimeCreator;
 
+import java.util.List;
 import java.util.concurrent.FutureTask;
 import java.util.concurrent.TimeUnit;
 
@@ -74,6 +75,10 @@ public class AnimeServiceTest {
 
         BDDMockito.when(animeRepositoryMock.save(AnimeCreator.createValidAnime()))
                 .thenReturn(Mono.empty());
+
+        BDDMockito.when(animeRepositoryMock
+                        .saveAll(List.of(AnimeCreator.createAnimeToBeSaved(), AnimeCreator.createAnimeToBeSaved())))
+                .thenReturn(Flux.just(anime, anime));
     }
 
     @Test
@@ -156,6 +161,33 @@ public class AnimeServiceTest {
                 .verify();
     }
 
+
+    @Test
+    @DisplayName("saveAll creates a list of anime when successful")
+    public void saveAll_CreatesListOfAnime_WhenSuccessful() {
+        Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
+
+        StepVerifier.create(animeService.saveAll(List.of(animeToBeSaved, animeToBeSaved)))
+                .expectSubscription()
+                .expectNext(anime, anime)
+                .verifyComplete();
+    }
+
+    @Test
+    @DisplayName("saveAll returns Mono error when one of the objects in the list contains empty or null name")
+    public void saveAll_ReturnsMonoError_WhenContainsInvalidName() {
+        Anime animeToBeSaved = AnimeCreator.createAnimeToBeSaved();
+
+        BDDMockito.when(animeRepositoryMock
+                        .saveAll(ArgumentMatchers.anyIterable()))
+                .thenReturn(Flux.just(anime, anime.withName("")));
+
+        StepVerifier.create(animeService.saveAll(List.of(animeToBeSaved, animeToBeSaved.withName(""))))
+                .expectSubscription()
+                .expectNext(anime)
+                .expectError(ResponseStatusException.class)
+                .verify();
+    }
 
 
 
