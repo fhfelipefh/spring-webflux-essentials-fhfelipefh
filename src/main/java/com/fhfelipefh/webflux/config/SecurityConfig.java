@@ -1,7 +1,11 @@
 package com.fhfelipefh.webflux.config;
 
+import com.fhfelipefh.webflux.repository.FhfelipefhUserRepository;
+import com.fhfelipefh.webflux.service.FhfelipefhUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.ReactiveAuthenticationManager;
+import org.springframework.security.authentication.UserDetailsRepositoryReactiveAuthenticationManager;
 import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -22,6 +26,8 @@ public class SecurityConfig {
                 .csrf().disable()
                 .authorizeExchange()
                 .pathMatchers(HttpMethod.POST, "/animes/**").hasRole("ADMIN")
+                .pathMatchers(HttpMethod.PUT, "/animes/**").hasRole("ADMIN")
+                .pathMatchers(HttpMethod.DELETE, "/animes/**").hasRole("ADMIN")
                 .pathMatchers(HttpMethod.GET, "/animes/**").hasRole("USER")
                 .anyExchange().authenticated()
                 .and()
@@ -34,19 +40,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    public MapReactiveUserDetailsService userDetailsService() {
-        PasswordEncoder passwordEncoder = PasswordEncoderFactories.createDelegatingPasswordEncoder();
-        UserDetails user = User.withUsername("user")
-                .password(passwordEncoder.encode("fhfelipefh"))
-                .roles("USER")
-                .build();
-
-        UserDetails admin = User.withUsername("admin")
-                .password(passwordEncoder.encode("fhfelipefh"))
-                .roles("USER", "ADMIN")
-                .build();
-
-        return new MapReactiveUserDetailsService(user, admin);
+    ReactiveAuthenticationManager authenticationManager(FhfelipefhUserDetailsService fhfelipefhUserDetailsService) {
+        return new UserDetailsRepositoryReactiveAuthenticationManager(fhfelipefhUserDetailsService);
     }
 
 }
