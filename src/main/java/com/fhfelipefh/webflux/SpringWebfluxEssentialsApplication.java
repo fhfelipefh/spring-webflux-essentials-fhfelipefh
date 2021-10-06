@@ -14,7 +14,6 @@ public class SpringWebfluxEssentialsApplication {
         );
     }
 
-
     public static void main(String[] args) {
         System.out.println(PasswordEncoderFactories.createDelegatingPasswordEncoder().encode("fhfelipefh"));
         SpringApplication.run(SpringWebfluxEssentialsApplication.class, args);
